@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Generative Aircraft Designer</title>
+        <script type="importmap">
+            {
+              "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/"
+              }
+            }
+          </script>
+          
+        <script type="module" src="./sketch.js"></script>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+
+        <style>
+            html, body, canvas {
+                margin: 0;
+                padding: 0;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                font-family: 'Roboto', sans-serif;
+                background-color: #222;
+                color: #fff;
+            }
+            .app-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: #222;
+                padding: 10px;
+            }
+            .button-container {
+                display: flex;
+            }
+            .app-header button {
+                margin-left: 10px;
+            }
+            .app-name {
+                font-weight: 400;
+                font-size: 24px;
+                margin-bottom: 0;
+            }
+            .floating-menu {
+                position: fixed;
+                top: 60px;
+                right: 20px;
+                background-color: rgba(51, 51, 51, 0.45);
+                padding: 10px;
+                border-radius: 5px;
+                display: none;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .control-item {
+                margin: 5px;
+                display: flex;
+                align-items: center;
+            }
+            select, input[type="range"], button {
+                border: 1px solid #555;
+                background-color: #444;
+                color: #fff;
+                padding: 5px;
+                border-radius: 5px;
+                font-size: 14px;
+                outline: none;
+                transition: background-color 0.2s;
+            }
+            input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 14px;
+                height: 14px;
+                background-color: #555;
+                border-radius: 50%;
+                cursor: pointer;
+            }
+            a {
+                color: #fff;
+                text-decoration: none;
+            }
+            button {
+                cursor: pointer;
+            }
+            button:hover, select:hover, input[type="range"]:hover {
+                background-color: #555;
+            }
+            label {
+                font-weight: 300;
+            }
+            @media (max-width: 767px) {
+                .controls {
+                    flex-direction: column;
+                }
+                .control-group {
+                    margin-bottom: 10px;
+                }
+                .app-name {
+                    font-size: 12px;
+                }
+                button {
+                    font-size: 7px;
+                }
+                .item-centered {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app-header">
+            <div class="app-name">
+                <img src="icon.png" width=30 valign="middle" title="Generative Aircraft Designer"> Generative Aircraft Designer
+            </div>
+            <div class="button-container">
+                <button id="generate">Generate</button>
+                <button id="animate">Animate</button>
+                <button id="toggle-menu">Show Menu</button>
+            </div>
+        </div>
+        <div class="floating-menu" id="floating-menu">
+            <div class="control-item">
+                <label for="aircraftType">Aircraft Type:</label>
+                <select id="aircraftType">
+                    <option value="commercial">Commercial</option>
+                    <option value="military">Military</option>
+                    <option value="general">General Aviation</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="wingShape">Wing Shape:</label>
+                <select id="wingShape">
+                    <option value="straight">Straight</option>
+                    <option value="swept">Swept</option>
+                    <option value="delta">Delta</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="engineCount">Engine Count:</label>
+                <input type="number" id="engineCount" value="2" min="1" max="4" />
+            </div>
+            <div class="control-item">
+                <label for="enginePlacement">Engine Placement:</label>
+                <select id="enginePlacement">
+                    <option value="wing">Wing</option>
+                    <option value="fuselage">Fuselage</option>
+                </select>
+            </div>
+            <div class="control-item">
+                <label for="tailType">Tail Type:</label>
+                <select id="tailType">
+                    <option value="single">Single Vertical Stabilizer</option>
+                    <option value="twin">Twin Vertical Stabilizers</option>
+                </select>
+            </div>
+            <div class="control-item item-centered">
+                <button onclick="downloadImage()">Download Current Aircraft</button>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function () {
+                const toggleMenuButton = document.getElementById("toggle-menu");
+                const floatingMenu = document.getElementById("floating-menu");
+                toggleMenuButton.addEventListener("click", function () {
+                    floatingMenu.style.display = floatingMenu.style.display === "none" ? "block" : "none";
+                });
+            });
+
+            function downloadImage() {
+                console.log("Download Image function called");
+                const canvas = document.querySelector('canvas');
+                if (canvas) {
+                    const link = document.createElement('a');
+                    link.download = 'aircraft.png';
+                    link.href = canvas.toDataURL('image/png');
+                    link.click();
+                } else {
+                    console.error("Canvas not found for download.");
+                }
+            }
+
+            function animateButton() {
+                console.log("Animate function called from button");
+            }
+        </script>
+    </body>
+</html>
