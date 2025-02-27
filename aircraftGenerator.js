@@ -22,14 +22,16 @@ export function generateAircraft(params) {
     const fuselageGeometry = new THREE.CylinderGeometry(fuselageRadius, fuselageRadius, fuselageLength, 32);
     const fuselageMaterial = new THREE.MeshStandardMaterial({ color: 0x808080 });
     const fuselage = new THREE.Mesh(fuselageGeometry, fuselageMaterial);
-    fuselage.rotation.z = Math.PI / 2;
+
+    // Using Euler angles for rotation
+    fuselage.rotation.set(0, Math.PI / 2, Math.PI / 2);
     group.add(fuselage);
 
     // Nose cone
     const noseGeometry = new THREE.ConeGeometry(fuselageRadius, noseLength, 32);
     const nose = new THREE.Mesh(noseGeometry, fuselageMaterial);
-    nose.rotation.z = Math.PI / 2;
-    nose.position.set(fuselageLength / 2 + noseLength / 2, 0, 0);
+    nose.rotation.set(0, Math.PI / 2, Math.PI / 2); // Match fuselage rotation
+    nose.position.set(0, 0, fuselageLength / 2 + noseLength / 2); // In front along Z-axis
     group.add(nose);
 
     console.log("Fuselage and nose created");
@@ -50,13 +52,20 @@ export function generateAircraft(params) {
 
     const wingGeometry = new THREE.BoxGeometry(wingSpan, wingThickness, wingDepth);
     const wingMaterial = new THREE.MeshStandardMaterial({ color: 0x404040 });
+
+    // Left Wing
     const leftWing = new THREE.Mesh(wingGeometry, wingMaterial);
-    leftWing.position.set(-fuselageRadius, wingPosition, 0);
-    leftWing.rotation.y = (wingShape === "swept") ? Math.PI / 6 : 0;
+  //  leftWing.position.set(-wingSpan / 2 - fuselageRadius, wingPosition, 0);
+    leftWing.position.set(-wingSpan / 2 - fuselageRadius, 0, wingPosition);
+
+    leftWing.rotation.set(0, (wingShape === "swept") ? -Math.PI / 6 : 0, 0);
     group.add(leftWing);
 
-    const rightWing = leftWing.clone();
-    rightWing.position.x *= -1;
+    // Right Wing
+    const rightWing = new THREE.Mesh(wingGeometry, wingMaterial);
+   // rightWing.position.set(wingSpan / 2 + fuselageRadius, wingPosition, 0);
+    rightWing.position.set(wingSpan / 2 + fuselageRadius, 0, wingPosition);
+    rightWing.rotation.set(0, (wingShape === "swept") ? Math.PI / 6 : 0, 0);
     group.add(rightWing);
 
     console.log("Wings created");
@@ -77,11 +86,17 @@ export function generateAircraft(params) {
         const engineGeometry = new THREE.CylinderGeometry(engineRadius, engineRadius, engineLength, 32);
         const engineMaterial = new THREE.MeshStandardMaterial({ color: 0x202020 });
         const engine = new THREE.Mesh(engineGeometry, engineMaterial);
-        engine.rotation.z = Math.PI / 2;
+
+        // Using Euler angles for rotation
+        engine.rotation.set(0, Math.PI / 2, Math.PI / 2);
 
         if (enginePlacement === "wing" && aircraftType === "airliner") {
-            engine.position.set(-engineOffset + (i * engineOffset * 2), wingPosition - 1, -wingDepth / 2);
-        } else {
+            engine.position.set(
+                (i === 0 ? -wingSpan / 4 : wingSpan / 4), // Left and right engines
+                -fuselageRadius - engineRadius,           // Under the wings
+                wingPosition                              // Aligned with wing's position
+            );
+        }else {
             engine.position.set(0, -0.3, engineOffset - (i * 1.2));
         }
         group.add(engine);
@@ -97,15 +112,19 @@ export function generateAircraft(params) {
     const tailGeometry = new THREE.BoxGeometry(tailWidth, tailHeight, 0.1);
     const tail = new THREE.Mesh(tailGeometry, fuselageMaterial);
     tail.position.set(0, tailHeight / 2, tailPosition);
+
+    // Tail rotation using Euler angles
+    tail.rotation.set(0, Math.PI / 2, 0);
+  //  tail.rotation.set(0, 0, 0);
     group.add(tail);
 
     if (tailType === "twin") {
         const twinTailLeft = tail.clone();
         const twinTailRight = tail.clone();
-        twinTailLeft.position.x = -tailWidth;
-        twinTailRight.position.x = tailWidth;
-        twinTailLeft.rotation.z = Math.PI / 12;
-        twinTailRight.rotation.z = -Math.PI / 12;
+        twinTailLeft.position.x = -tailWidth - fuselageRadius;
+        twinTailRight.position.x = tailWidth + fuselageRadius;
+        twinTailLeft.rotation.set(0, Math.PI / 12, 0);
+        twinTailRight.rotation.set(0, -Math.PI / 12, 0);
         group.add(twinTailLeft);
         group.add(twinTailRight);
     }
@@ -118,10 +137,13 @@ export function generateAircraft(params) {
     let stabThickness = 0.1;
 
     const stabGeometry = new THREE.BoxGeometry(stabSpan, stabThickness, stabDepth);
+
+    // Left Stabilizer
     const leftStab = new THREE.Mesh(stabGeometry, fuselageMaterial);
-    leftStab.position.set(-stabSpan / 2, tailHeight / 3, tailPosition);
+    leftStab.position.set(-stabSpan / 2 - fuselageRadius, tailHeight / 3, tailPosition);
     group.add(leftStab);
 
+    // Right Stabilizer
     const rightStab = leftStab.clone();
     rightStab.position.x *= -1;
     group.add(rightStab);
@@ -133,12 +155,15 @@ export function generateAircraft(params) {
         const gearMaterial = new THREE.MeshStandardMaterial({ color: 0x333333 });
 
         const noseGear = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.2, 1), gearMaterial);
-        noseGear.position.set(fuselageLength / 2 - 2, -fuselageRadius - 0.5, 0);
+        //noseGear.position.set(fuselageLength / 2 - 2, -fuselageRadius - 0.5, 0);
+        noseGear.position.set(0, -fuselageRadius - 1, fuselageLength/2-2);
+        noseGear.rotation.set(Math.PI / 2, 0, 0);
         group.add(noseGear);
 
         for (let i = -1; i <= 1; i += 2) {
             const mainGear = new THREE.Mesh(new THREE.CylinderGeometry(0.3, 0.3, 1.5), gearMaterial);
             mainGear.position.set(i * fuselageRadius * 2, -fuselageRadius - 1, wingPosition);
+            mainGear.rotation.set(Math.PI / 2, 0, 0);
             group.add(mainGear);
         }
     }
